@@ -1,0 +1,1 @@
+// nest generate resource upload
