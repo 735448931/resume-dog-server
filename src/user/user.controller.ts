@@ -1,34 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	Patch,
+	Param,
+	Delete,
+	UseGuards,
+	Request
+} from '@nestjs/common'
+import { UserService } from './user.service'
+import { RegisterDto } from './dto/register.dto'
+import { ResponseUtil } from 'src/common/utils/respomse.util'
+import { Public } from 'src/common/auth/public.decorator'
+import { JwtAuthGuard } from 'src/common/auth/jwt-auth.guard'
+import { LoginDto } from './dto/login.dto'
+import { UpdateDto } from './dto/update.dto'
 
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+	constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
+	@Post('register')
+	@Public()
+	async register(@Body() registerDto: RegisterDto) {
+		const result = await this.userService.register(registerDto)
+		return ResponseUtil.success(result)
+	}
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
+	@Post('login')
+	@Public()
+	async login(@Body() loginDto: LoginDto) {
+		const result = await this.userService.login(loginDto)
+		return ResponseUtil.success(result, '登录成功')
+	}
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
+	@Get('info')
+	async getUserInfo(@Request() req: any) {
+		const { userId } = req.user
+		const userInfo = await this.userService.getUserInfo(userId)
+		return ResponseUtil.success(userInfo)
+	}
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
+	@Post('profile')
+	async updateUserProfile(@Request() req: any, @Body() updateDto: UpdateDto) {
+		const { userId } = req.user
+		const user = await this.userService.updateUser(userId, updateDto)
+		return ResponseUtil.success(user, '更新成功')
+	}
 }
