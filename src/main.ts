@@ -29,6 +29,6 @@ async function bootstrap() {
 			transform: true // 自动类型转换
 		})
 	)
-	await app.listen(process.env.PORT ?? 3000)
+	await app.listen(process.env.PORT ?? 8888)
 }
 bootstrap()
