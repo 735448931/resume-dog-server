@@ -31,11 +31,11 @@ export class InterviewQuestion {
 	@Prop({ required: true })
 	answer: string // 参考答案
 
-	@Prop({ enum: QuestionCategory, required: true })
-	category: QuestionCategory // 问题类别
+	@Prop({ type: SchemaTypes.Mixed, required: true })
+	category: string | number // 问题类别
 
-	@Prop({ enum: QuestionDifficulty, required: true })
-	difficulty: QuestionDifficulty // 难度
+	@Prop({ type: SchemaTypes.Mixed, required: true })
+	difficulty: string | number // 难度
 
 	@Prop()
 	tips?: string // 回答提示
@@ -59,8 +59,7 @@ export class InterviewQuestion {
 	userNote?: string // 用户笔记
 }
 
-export const InterviewQuestionSchema =
-	SchemaFactory.createForClass(InterviewQuestion)
+export const InterviewQuestionSchema = SchemaFactory.createForClass(InterviewQuestion)
 
 /**
  * 技能匹配项
@@ -94,8 +93,7 @@ export class LearningPriority {
 	reason: string // 原因
 }
 
-export const LearningPrioritySchema =
-	SchemaFactory.createForClass(LearningPriority)
+export const LearningPrioritySchema = SchemaFactory.createForClass(LearningPriority)
 
 /**
  * 雷达图维度
@@ -243,8 +241,7 @@ export class ResumeQuizResult {
 	promptVersion?: string // Prompt版本（用于A/B测试）
 }
 
-export const ResumeQuizResultSchema =
-	SchemaFactory.createForClass(ResumeQuizResult)
+export const ResumeQuizResultSchema = SchemaFactory.createForClass(ResumeQuizResult)
 
 // 创建索引
 ResumeQuizResultSchema.index({ userId: 1, createdAt: -1 })

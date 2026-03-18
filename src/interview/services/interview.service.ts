@@ -162,6 +162,7 @@ export class InterviewService {
 			})
 
 			this.logger.log(`✅ 押题部分生成完成: 问题数=${questionsResult.questions?.length || 0}`)
+			this.logger.log(`✅ 面试问题生成结果: ${JSON.stringify(questionsResult)}`)
 
 			this.emitProgress(progressSubject, 50, '✅ 面试问题生成完成，开始分析匹配度...')
 
