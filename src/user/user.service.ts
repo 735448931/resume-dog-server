@@ -1,9 +1,4 @@
-import {
-	BadRequestException,
-	Injectable,
-	NotFoundException,
-	UnauthorizedException
-} from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 
 import { RegisterDto } from './dto/register.dto'
 import { InjectModel } from '@nestjs/mongoose'
@@ -15,12 +10,10 @@ import { UpdateDto } from './dto/update.dto'
 
 @Injectable()
 export class UserService {
-	constructor() {}
-
-	@InjectModel(User.name)
-	private userModel: Model<UserDocument>
-
-	private jwtService: JwtService
+	constructor(
+		@InjectModel(User.name) private userModel: Model<UserDocument>,
+		private jwtService: JwtService
+	) {}
 
 	async register(registerDto: RegisterDto) {
 		const { username, email, password } = registerDto
@@ -67,7 +60,7 @@ export class UserService {
 		delete userInfo.password
 		return {
 			token,
-			user: userInfo
+			userInfo: userInfo
 		}
 	}
 
@@ -82,30 +75,28 @@ export class UserService {
 		return user
 	}
 
-	  async updateUser(userId: string, updateDto: UpdateDto) {
-    // 如果更新邮箱，检查邮箱是否已被使用
-    if (updateDto.email) {
-      const existingUser = await this.userModel.findOne({
-        email: updateDto.email,
-        _id: { $ne: userId }, // 排除当前用户
-      });
+	async updateUser(userId: string, updateDto: UpdateDto) {
+		// 如果更新邮箱，检查邮箱是否已被使用
+		if (updateDto.email) {
+			const existingUser = await this.userModel.findOne({
+				email: updateDto.email,
+				_id: { $ne: userId } // 排除当前用户
+			})
 
-      if (existingUser) {
-        throw new BadRequestException('邮箱已被使用');
-      }
-    }
+			if (existingUser) {
+				throw new BadRequestException('邮箱已被使用')
+			}
+		}
 
-    const user = await this.userModel.findByIdAndUpdate(userId, updateDto, {
-      new: true,
-    });
+		const user = await this.userModel.findByIdAndUpdate(userId, updateDto, {
+			new: true
+		})
 
-    if (!user) {
-      throw new NotFoundException('用户不存在');
-    }
+		if (!user) {
+			throw new NotFoundException('用户不存在')
+		}
 
-    delete user.password;
-    return user;
-  }
-
-
+		delete user.password
+		return user
+	}
 }

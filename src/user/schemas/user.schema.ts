@@ -1,5 +1,21 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { Document } from 'mongoose'
+import { Document, Types } from 'mongoose'
+
+@Schema({ _id: true })
+export class ResumeItem {
+	_id: Types.ObjectId
+
+	@Prop({ required: true })
+	name: string // 简历名称
+
+	@Prop({ required: true })
+	url: string // 简历文件 URL
+
+	@Prop({ default: () => new Date() })
+	uploadedAt: Date // 上传时间
+}
+
+export const ResumeItemSchema = SchemaFactory.createForClass(ResumeItem)
 
 export type UserDocument = User &
 	Document & {
@@ -32,6 +48,9 @@ export class User {
 
 	@Prop()
 	password?: string
+
+	@Prop({ type: [ResumeItemSchema], default: [] })
+	resumes: ResumeItem[] // 用户上传的简历列表
 
 	// 用户个人信息
 	@Prop()

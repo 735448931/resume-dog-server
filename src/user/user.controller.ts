@@ -1,14 +1,4 @@
-import {
-	Controller,
-	Get,
-	Post,
-	Body,
-	Patch,
-	Param,
-	Delete,
-	UseGuards,
-	Request
-} from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpCode } from '@nestjs/common'
 import { UserService } from './user.service'
 import { RegisterDto } from './dto/register.dto'
 import { ResponseUtil } from 'src/common/utils/respomse.util'
@@ -31,6 +21,7 @@ export class UserController {
 
 	@Post('login')
 	@Public()
+	@HttpCode(200)
 	async login(@Body() loginDto: LoginDto) {
 		const result = await this.userService.login(loginDto)
 		return ResponseUtil.success(result, '登录成功')
