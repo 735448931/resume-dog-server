@@ -10,6 +10,7 @@ import { Model, Types } from 'mongoose'
 import { ResumeQuizResult, ResumeQuizResultDocument } from '../schemas/interview-quiz-result.schema'
 import { DocumentParserService } from './document-parser.service'
 import { InterviewAIService } from './interview-ai.service'
+import { MockInterviewEventDto, MockInterviewEventType, StartMockInterviewDto } from '../dto/mock-interview.dto'
 
 export interface ProgressEvent {
 	type: 'progress' | 'complete' | 'error' | 'timeout'
@@ -495,4 +496,75 @@ export class InterviewService {
 		}
 		throw new BadRequestException('请提供简历URL或简历内容')
 	}
+
+
+
+
+
+
+
+	// ===================== 模拟面试内容 =====================
+	startMockInterviewWithStream(userId: string, dto: StartMockInterviewDto): Subject<MockInterviewEventDto> {
+		const subject = new Subject<MockInterviewEventDto>()
+
+		this.executeStartMockInterview(userId, dto, subject).catch((error) => { 
+			this.logger.error(`模拟面试启动失败: ${error.message}`, error.stack);
+			if (subject && !subject.closed) {
+				subject.next({
+					type: MockInterviewEventType.ERROR,
+					error: error,
+				});
+				subject.complete();
+			}
+		})
+
+
+		return subject;
+	}
+
+
+
+	  /**
+   * 执行开始模拟面试
+   * 该方法用于启动一场模拟面试，包括检查用户的剩余次数、生成面试开场白、创建面试会话、记录消费记录，并实时向前端推送面试进度。
+   * 它包括以下几个主要步骤：
+   * 1. 扣除用户模拟面试次数；
+   * 2. 提取简历内容；
+   * 3. 创建会话并生成相关记录；
+   * 4. 流式生成面试开场白，并逐块推送到前端；
+   * 5. 保存面试开场白到数据库；
+   * 6. 处理失败时的退款操作。
+   *
+   * @param userId - 用户ID，表示正在进行面试的用户。
+   * @param dto - 启动模拟面试的详细数据，包括面试类型、简历ID、职位信息等。
+   * @param progressSubject - 用于实时推送面试进度的`Subject`对象，前端通过它接收流式数据。
+   *
+   * @returns Promise<void> - 返回一个 `Promise`，表示模拟面试的启动过程（包含异步操作）。
+   */
+	private async executeStartMockInterview(
+		userId: string,
+		dto: StartMockInterviewDto,
+		progressSubject: Subject<MockInterviewEventDto>,
+	): Promise<void> {
+
+		try {
+			// 1. 检查并扣除次数
+
+			// 查找用户并确保剩余次数足够
+			const user = await this.userModel.findOneAndUpdate(
+				{
+					_id: userId,
+					specialRemainingCount: { $gt: 0 },
+				},
+				{
+					$inc: { specialRemainingCount: -1 }, // 扣除一次模拟面试的次数
+				},
+				{ new: false },
+			);
+		} catch (error) {
+
+		}
+	}
+
+	
 }
