@@ -3,10 +3,11 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { RegisterDto } from './dto/register.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { User, UserDocument } from './schemas/user.schema'
-import { Model } from 'mongoose'
+import { Model, Types } from 'mongoose'
 import { LoginDto } from './dto/login.dto'
 import { JwtService } from '@nestjs/jwt'
 import { UpdateDto } from './dto/update.dto'
+import { AddResumeDto } from './dto/add-resume.dto'
 
 @Injectable()
 export class UserService {
@@ -88,9 +89,31 @@ export class UserService {
 			}
 		}
 
-		const user = await this.userModel.findByIdAndUpdate(userId, updateDto, {
-			new: true
-		})
+		const user = await this.userModel
+			.findByIdAndUpdate(userId, updateDto, {
+				new: true
+			})
+			.lean()
+
+		if (!user) {
+			throw new NotFoundException('用户不存在')
+		}
+
+		delete user.password
+		return user
+	}
+
+	async addResume(userId: string, addResumeDto: AddResumeDto) {
+		const resumeItem = {
+			_id: new Types.ObjectId(),
+			name: addResumeDto.name,
+			url: addResumeDto.url,
+			uploadedAt: new Date()
+		}
+
+		const user = await this.userModel
+			.findByIdAndUpdate(userId, { $push: { resumes: resumeItem } }, { new: true })
+			.lean()
 
 		if (!user) {
 			throw new NotFoundException('用户不存在')

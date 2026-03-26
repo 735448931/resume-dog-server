@@ -6,6 +6,7 @@ import { Public } from 'src/common/auth/public.decorator'
 import { JwtAuthGuard } from 'src/common/auth/jwt-auth.guard'
 import { LoginDto } from './dto/login.dto'
 import { UpdateDto } from './dto/update.dto'
+import { AddResumeDto } from './dto/add-resume.dto'
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
@@ -39,5 +40,12 @@ export class UserController {
 		const { userId } = req.user
 		const user = await this.userService.updateUser(userId, updateDto)
 		return ResponseUtil.success(user, '更新成功')
+	}
+
+	@Post('resume')
+	async updateUserResume(@Request() req: any, @Body() addResumeDto: AddResumeDto) {
+		const { userId } = req.user
+		const user = await this.userService.addResume(userId, addResumeDto)
+		return ResponseUtil.success(user, '简历更新成功')
 	}
 }
